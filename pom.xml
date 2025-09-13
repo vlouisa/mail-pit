@@ -45,19 +45,26 @@
 
     <properties>
         <assertj.version>3.27.4</assertj.version>
+        <jackson.version>2.20.0</jackson.version>
         <java.version>21</java.version>
-        <junit.version>5.13.4</junit.version>
         <logback.version>1.5.18</logback.version>
         <lombok.version>1.18.40</lombok.version>
         <maven-doc.version>3.8.0</maven-doc.version>
         <maven-source.version>3.3.1</maven-source.version>
         <maven.compiler.version>3.13.0</maven.compiler.version>
+        <rest-assured.version>5.5.0</rest-assured.version>
+        <testcontainers.version>1.20.6</testcontainers.version>
 
         <maven.compiler.release>${java.version}</maven.compiler.release>
     </properties>
 
     <dependencies>
-        <!-- Spring Test for MockMvc -->
+        <!-- Jackson for JSON serialization -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
@@ -70,19 +77,28 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
-        <!-- JUnit 5 for testing -->
+        <!-- Test containers for integration testing -->
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${rest-assured.version}</version>
+        </dependency>
+
         <!-- AssertJ for fluent assertions -->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

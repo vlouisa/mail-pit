@@ -1,0 +1,146 @@
+name: Deploy / Release Pipeline
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+permissions:
+  contents: write  # Required to push commits and tags
+
+jobs:
+  bump-version:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    env:
+      JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.8-9/x64
+
+    steps:
+      # Step 1: Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # Step 2: Configure Git for automated commits
+      - name: Configure Git
+        run: |
+          git config user.name "Version Bump Bot"
+          git config user.email "version-bump@users.noreply.github.com"
+
+      # Step 3: Set up JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Step 4: Get source branch of merged PR
+      - name: Get merged branch
+        id: get_branch
+        run: |
+          echo "merged_branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
+          echo "Merged branch: ${{ github.event.pull_request.head.ref }}"
+
+      # Step 5: Validate branch prefix
+      - name: Validate branch prefix
+        run: |
+          if [[ "$merged_branch" != feature/* && "$merged_branch" != fix/* && "$merged_branch" != release/* ]]; then
+            echo "Error: Branch '$merged_branch' has invalid prefix. Use feature/, fix/, or release/."
+            exit 1
+          fi
+
+      # Step 6: Run Maven tests
+      - name: Run Maven tests
+        run: mvn clean test
+
+      # Step 7: Get current Maven version
+      - name: Get current Maven version
+        id: read_version
+        run: |
+          CURRENT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_ENV
+          echo "Current version: $CURRENT_VERSION"
+
+      # Step 8: Compute release and next snapshot versions
+      - name: Compute release and next snapshot
+        id: bump_version
+        run: |
+          VERSION=${current_version%-SNAPSHOT}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          if [[ "$merged_branch" == feature/* ]]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          elif [[ "$merged_branch" == fix/* ]]; then
+            PATCH=$((PATCH))
+          elif [[ "$merged_branch" == release/* ]]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          fi
+
+          RELEASE_VERSION="$MAJOR.$MINOR.$PATCH"
+          NEXT_SNAPSHOT="$MAJOR.$MINOR.$((PATCH + 1))-SNAPSHOT"
+
+          echo "release_version=$RELEASE_VERSION" >> $GITHUB_ENV
+          echo "next_snapshot=$NEXT_SNAPSHOT" >> $GITHUB_ENV
+          echo "tag_version=$RELEASE_VERSION" >> $GITHUB_ENV
+          echo "Release version: $RELEASE_VERSION, Next snapshot: $NEXT_SNAPSHOT"
+
+      # Step 9: Set Maven to release version
+      - name: Set Maven release version
+        run: mvn versions:set -DnewVersion=$release_version -DgenerateBackupPoms=false
+
+      # Step 10: Commit and push release version (optional)
+      - name: Commit release version
+        run: |
+          git add pom.xml
+          git commit -m "Set release version $release_version [skip ci]" || echo "No changes to commit"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin HEAD
+
+      # Step 11: Create and push Git tag
+      - name: Create and push tag
+        run: |
+          git tag -a "$tag_version" -m "Release $tag_version"
+          git push origin "$tag_version"
+
+      # Step 12: Create GitHub release
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.tag_version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 13: Deploy release to GitHub Packages
+      - name: Deploy to GitHub Packages
+        run: |
+          mkdir -p $HOME/.m2
+          cat <<EOF > $HOME/.m2/settings.xml
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+            <servers>
+              <server>
+                <id>github-vlouisa</id>
+                <username>vlouisa</username>
+                <password>${GITHUB_TOKEN}</password>
+                </server>
+                </servers>
+              </settings>
+          EOF
+          mvn clean deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PACKAGES_PAT }}
+
+      # Step 14: Bump to next snapshot
+      - name: Bump to next snapshot
+        run: |
+          mvn versions:set -DnewVersion=$next_snapshot -DgenerateBackupPoms=false
+          git add pom.xml
+          git commit -m "Bump version to $next_snapshot [skip ci]" || echo "No changes to commit"
+          git push origin HEAD
