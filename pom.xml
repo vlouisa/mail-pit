@@ -48,14 +48,18 @@
         <awaitility.version>4.3.0</awaitility.version>
         <jackson.version>2.20.0</jackson.version>
         <java.version>21</java.version>
-        <logback.version>1.5.18</logback.version>
+        <logback.version>1.5.19</logback.version>
         <lombok.version>1.18.40</lombok.version>
         <maven-doc.version>3.8.0</maven-doc.version>
         <maven-source.version>3.3.1</maven-source.version>
         <maven.compiler.version>3.13.0</maven.compiler.version>
-        <rest-assured.version>5.5.0</rest-assured.version>
-        <testcontainers.version>1.20.6</testcontainers.version>
+        <rest-assured.version>5.5.6</rest-assured.version>
+        <testcontainers.version>1.21.3</testcontainers.version>
 
+        <jakarta.mail.version>2.0.2</jakarta.mail.version>
+        <spring-boot-starter-test.version>3.5.6</spring-boot-starter-test.version>
+        <spring-context-support.version>6.2.10</spring-context-support.version>
+        
         <maven.compiler.release>${java.version}</maven.compiler.release>
     </properties>
 
@@ -105,6 +109,24 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>
+        </dependency>
+        <!-- Spring Boot Test Starter for testing MailPit functionality -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <version>${spring-boot-starter-test.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${spring-context-support.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>${jakarta.mail.version}</version> 
         </dependency>
     </dependencies>
     <build>

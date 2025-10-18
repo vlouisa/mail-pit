@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.louisa.victor.mail.pit.api.MailPitApi;
 import dev.louisa.victor.mail.pit.model.MailPitResponse;
 import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.ObjectAssert;
+import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionTimeoutException;
 
 import java.time.Duration;
-
-import static org.awaitility.Awaitility.await;
 
 public class MailPitResponseAssert extends AbstractAssert<MailPitResponseAssert, MailPitResponse> {
     protected MailPitResponseAssert(MailPitResponse actual) {
@@ -22,6 +21,8 @@ public class MailPitResponseAssert extends AbstractAssert<MailPitResponseAssert,
     public static class MailPitResponseInput {
         private String baseUri;
         private int expectedCount = 0;
+        private int waitTimeInSeconds = 10;
+        private int pollingIntervalInMillis = 500;
 
         public MailPitResponseInput fromBaseUri(String baseUri) {
             this.baseUri = baseUri;
@@ -32,20 +33,40 @@ public class MailPitResponseAssert extends AbstractAssert<MailPitResponseAssert,
             this.expectedCount = expectedCount;
             return this;
         }
+        
+        public MailPitResponseInput waitTimeInSeconds(int waitTimeInSeconds) {
+            this.waitTimeInSeconds = waitTimeInSeconds;
+            return this;
+        }
+        
+        public MailPitResponseInput pollingIntervalInMillis(int pollingIntervalInMillis) {
+            this.pollingIntervalInMillis = pollingIntervalInMillis;
+            return this;
+        }
 
         public MailPitResponseAssert assertThat() throws JsonProcessingException {
             if(expectedCount <= 0) {
                 return new MailPitResponseAssert(MailPitApi.fetchMessages(baseUri));
             }
-            
-            await().atMost(Duration.ofSeconds(10))
-                    .pollInterval(Duration.ofMillis(500))
-                    .until(() -> {
-                        MailPitResponse response = MailPitApi.fetchMessages(baseUri);
-                        return response.messages().size() >= expectedCount;
-                    });
+
+            awaitMessages();
 
             return new MailPitResponseAssert(MailPitApi.fetchMessages(baseUri));
+        }
+
+        private void awaitMessages() {
+            try {
+                Awaitility.await().atMost(Duration.ofSeconds(waitTimeInSeconds))
+                        .pollInterval(Duration.ofMillis(pollingIntervalInMillis))
+                        .until(() -> {
+                            MailPitResponse response = MailPitApi.fetchMessages(baseUri);
+                            return response.messages().size() >= expectedCount;
+                        });
+            } catch (ConditionTimeoutException e) {;
+                throw new AssertionError(
+                        String.format("Expected at least <%s> messages but they were not received within <%s> seconds",
+                                expectedCount, waitTimeInSeconds), e);
+            }
         }
     }
     
@@ -64,12 +85,8 @@ public class MailPitResponseAssert extends AbstractAssert<MailPitResponseAssert,
                     messageNumber);
         }
 
-        return MailPitMessageAssert.assertMailPitMessage(
+        return new MailPitMessageAssert(
                 actual.messages().get(actual.messages().size() - messageNumber)
         );
-    }
-
-    public ObjectAssert<Integer> numberOfMessages() {
-        return new ObjectAssert<>(actual.messages().size());
     }
 }
