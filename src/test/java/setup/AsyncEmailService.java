@@ -7,7 +7,6 @@ import jakarta.mail.Transport;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -19,11 +18,10 @@ import java.io.UnsupportedEncodingException;
 @Slf4j
 public class AsyncEmailService {
     private final EmailSession emailSession;
-    private final ApplicationContext context;
     
+    @Async
     public void sendEmail(Email email) {
-        // call async method through the proxy, otherwise this sendEmail method will not be async
-        context.getBean(AsyncEmailService.class).sendEmail(email, 0);    
+        sendEmail(email, 0);
     }
 
     @Async
