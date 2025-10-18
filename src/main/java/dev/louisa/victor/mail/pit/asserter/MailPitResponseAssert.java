@@ -14,43 +14,53 @@ public class MailPitResponseAssert extends AbstractAssert<MailPitResponseAssert,
         super(actual, MailPitResponseAssert.class);
     }
 
-    public static MailPitResponseInput mailPitMessages() {
-        return new MailPitResponseInput();
+    public static MailPitResponseAwaitStage messagesFrom(String baseUri) {
+        return new MailPitResponseAssertBuilder(baseUri);
     }
-    
-    public static class MailPitResponseInput {
-        private String baseUri;
-        private int expectedCount = 0;
+
+    // --- Stage interfaces ---
+    public interface MailPitResponseAwaitStage {
+        MailPitResponseConfigStage awaitMessages(int expectedCount);
+    }
+
+    public interface MailPitResponseConfigStage {
+        MailPitResponseConfigStage waitTimeInSeconds(int waitTimeInSeconds);
+        MailPitResponseConfigStage pollingIntervalInMillis(int pollingIntervalInMillis);
+        MailPitResponseAssert assertThat() throws JsonProcessingException;
+    }
+
+    // --- Implementation of staged builder ---
+    private static class MailPitResponseAssertBuilder implements MailPitResponseAwaitStage, MailPitResponseConfigStage {
+        private final String baseUri;
+        private int expectedCount;
         private int waitTimeInSeconds = 10;
         private int pollingIntervalInMillis = 500;
 
-        public MailPitResponseInput fromBaseUri(String baseUri) {
+        private MailPitResponseAssertBuilder(String baseUri) {
             this.baseUri = baseUri;
-            return this;
         }
-        
-        public MailPitResponseInput awaitMessages(int expectedCount) {
+
+        @Override
+        public MailPitResponseConfigStage awaitMessages(int expectedCount) {
             this.expectedCount = expectedCount;
             return this;
         }
-        
-        public MailPitResponseInput waitTimeInSeconds(int waitTimeInSeconds) {
+
+        @Override
+        public MailPitResponseConfigStage waitTimeInSeconds(int waitTimeInSeconds) {
             this.waitTimeInSeconds = waitTimeInSeconds;
             return this;
         }
-        
-        public MailPitResponseInput pollingIntervalInMillis(int pollingIntervalInMillis) {
+
+        @Override
+        public MailPitResponseConfigStage pollingIntervalInMillis(int pollingIntervalInMillis) {
             this.pollingIntervalInMillis = pollingIntervalInMillis;
             return this;
         }
 
+        @Override
         public MailPitResponseAssert assertThat() throws JsonProcessingException {
-            if(expectedCount <= 0) {
-                return new MailPitResponseAssert(MailPitApi.fetchMessages(baseUri));
-            }
-
             awaitMessages();
-
             return new MailPitResponseAssert(MailPitApi.fetchMessages(baseUri));
         }
 
@@ -69,8 +79,8 @@ public class MailPitResponseAssert extends AbstractAssert<MailPitResponseAssert,
             }
         }
     }
-    
-    // Existing fluent methods
+
+    // --- Existing fluent methods ---
     public MailPitMessageAssert message(int messageNumber) {
         isNotNull();
 

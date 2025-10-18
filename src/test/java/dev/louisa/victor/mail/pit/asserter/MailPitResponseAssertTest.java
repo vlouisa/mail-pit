@@ -1,7 +1,6 @@
 package dev.louisa.victor.mail.pit.asserter;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import dev.louisa.victor.mail.pit.docker.MailPitContainer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import setup.*;
 
+import static dev.louisa.victor.mail.pit.asserter.MailPitResponseAssert.*;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @Slf4j
@@ -49,10 +49,9 @@ public class MailPitResponseAssertTest {
                         .build());
         
         assertThatCode(() ->
-                MailPitResponseAssert.mailPitMessages()
+                messagesFrom(mailPitContainer.baseUri())
                         .awaitMessages(1)
                         .pollingIntervalInMillis(200)
-                        .fromBaseUri(mailPitContainer.baseUri())
                         .assertThat()
                         .message(1)
                         .hasSender("elaine.marley@monkey-island.test")
@@ -75,10 +74,9 @@ public class MailPitResponseAssertTest {
         );
 
         assertThatCode(() ->
-                MailPitResponseAssert.mailPitMessages()
+                messagesFrom(mailPitContainer.baseUri())
                         .awaitMessages(1)
                         .waitTimeInSeconds(1)
-                        .fromBaseUri(mailPitContainer.baseUri())
                         .assertThat()
                         .message(1)
                         .hasSender("elaine.marley@monkey-island.test")
@@ -110,9 +108,8 @@ public class MailPitResponseAssertTest {
         );
 
         assertThatCode(() -> {
-                    MailPitResponseAssert.mailPitMessages()
+                    messagesFrom(mailPitContainer.baseUri())
                             .awaitMessages(2)
-                            .fromBaseUri(mailPitContainer.baseUri())
                             .assertThat()
                             .message(1)
                             .hasSender("elaine.marley@monkey-island.test")
@@ -120,9 +117,8 @@ public class MailPitResponseAssertTest {
                             .hasSubject("Welcome to Monkey Island!")
                             .bodySnippetContains("Welcome aboard!");
 
-                    MailPitResponseAssert.mailPitMessages()
+                    messagesFrom(mailPitContainer.baseUri())
                             .awaitMessages(0)
-                            .fromBaseUri(mailPitContainer.baseUri())
                             .assertThat()
                             .message(2)
                             .hasSender("elaine.marley@monkey-island.test")
@@ -150,9 +146,8 @@ public class MailPitResponseAssertTest {
                         .build());
 
         assertThatCode(() ->
-                MailPitResponseAssert.mailPitMessages()
+                messagesFrom(mailPitContainer.baseUri())
                         .awaitMessages(1)
-                        .fromBaseUri(mailPitContainer.baseUri())
                         .assertThat()
                         .message(1)
                         .hasSender(expectedSender)
@@ -175,10 +170,9 @@ public class MailPitResponseAssertTest {
                         .build());
 
         assertThatCode(() ->
-                MailPitResponseAssert.mailPitMessages()
+                messagesFrom(mailPitContainer.baseUri())
                         .awaitMessages(2)
                         .waitTimeInSeconds(2)
-                        .fromBaseUri(mailPitContainer.baseUri())
                         .assertThat()
                         .message(1)
                         .hasSender("elaine.marley@monkey-island.test")
@@ -204,10 +198,9 @@ public class MailPitResponseAssertTest {
                         .build());
 
         assertThatCode(() ->
-                MailPitResponseAssert.mailPitMessages()
+                messagesFrom(mailPitContainer.baseUri())
                         .awaitMessages(1)
                         .waitTimeInSeconds(2)
-                        .fromBaseUri(mailPitContainer.baseUri())
                         .assertThat()
                         .message(messageNumber)
                         .hasSender("elaine.marley@monkey-island.test")
