@@ -62,7 +62,7 @@ public class MailPitResponseAssert extends AbstractAssert<MailPitResponseAssert,
                             MailPitResponse response = MailPitApi.fetchMessages(baseUri);
                             return response.messages().size() >= expectedCount;
                         });
-            } catch (ConditionTimeoutException e) {;
+            } catch (ConditionTimeoutException e) {
                 throw new AssertionError(
                         String.format("Expected at least <%s> messages but they were not received within <%s> seconds",
                                 expectedCount, waitTimeInSeconds), e);

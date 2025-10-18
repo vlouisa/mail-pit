@@ -39,7 +39,7 @@ public class MailPitResponseAssertTest {
     }
 
     @Test
-    void shouldAssertResponseOkWhenMailPitResponseAssertionIsCompletelyCorrect() throws JsonProcessingException {
+    void shouldAssertResponseOkWhenMailPitResponseAssertionIsCompletelyCorrect() {
         asyncEmailService.sendEmail(
                 Email.builder()
                         .from(address("Elaine from Monkey Island", "elaine.marley@monkey-island.test"))
@@ -51,6 +51,7 @@ public class MailPitResponseAssertTest {
         assertThatCode(() ->
                 MailPitResponseAssert.mailPitMessages()
                         .awaitMessages(1)
+                        .pollingIntervalInMillis(200)
                         .fromBaseUri(mailPitContainer.baseUri())
                         .assertThat()
                         .message(1)
@@ -62,7 +63,7 @@ public class MailPitResponseAssertTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenMailPitResponseIsLate() throws JsonProcessingException {
+    void shouldThrowExceptionWhenMailPitResponseIsLate() {
         asyncEmailService.sendEmail(
                 Email.builder()
                         .from(address("Elaine from Monkey Island", "elaine.marley@monkey-island.test"))
@@ -90,7 +91,7 @@ public class MailPitResponseAssertTest {
     }
 
     @Test
-    void shouldAssertMultipleResponsesOkWhenMailPitResponseAssertionIsCompletelyCorrect() throws JsonProcessingException {
+    void shouldAssertMultipleResponsesOkWhenMailPitResponseAssertionIsCompletelyCorrect() {
         asyncEmailService.sendEmail(
                 Email.builder()
                         .from(address("Elaine from Monkey Island", "elaine.marley@monkey-island.test"))
@@ -140,7 +141,7 @@ public class MailPitResponseAssertTest {
             "elaine.marley@monkey-island.test, guybrush.threepwood@monkey-island.test, You're doomed!, Ahoy Matey! Welcome aboard!, Expected 'subject' to be <You're doomed!> but was <Welcome to Monkey Island!>",
             "elaine.marley@monkey-island.test, guybrush.threepwood@monkey-island.test, Welcome to Monkey Island!, There's no escape Matey!, Expected 'message body snippet' to contain <There's no escape Matey!> but it didn't. Actual body:",
     })
-    void shouldThrowExceptionWhenMailPitResponseAssertionIsNotCorrect(String expectedSender, String expectedRecipient, String expectedSubject, String expectedBody, String assertionMessage) throws JsonProcessingException {
+    void shouldThrowExceptionWhenMailPitResponseAssertionIsNotCorrect(String expectedSender, String expectedRecipient, String expectedSubject, String expectedBody, String assertionMessage) {
         asyncEmailService.sendEmail(
                 Email.builder()
                         .from(address("Elaine from Monkey Island", "elaine.marley@monkey-island.test"))
@@ -165,7 +166,7 @@ public class MailPitResponseAssertTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenExpectingMoreMessagesThanActuallySent() throws JsonProcessingException {
+    void shouldThrowExceptionWhenExpectingMoreMessagesThanActuallySent() {
         asyncEmailService.sendEmail(
                 Email.builder()
                         .from(address("Elaine from Monkey Island", "elaine.marley@monkey-island.test"))
