@@ -87,7 +87,6 @@ public class MailPitResponseAssertTest {
                         .bodySnippetContains("Welcome aboard!"))
                 .isInstanceOf(AssertionError.class)
                 .hasMessageContaining("Expected at least <1> messages but they were not received within <1> seconds");
-        System.out.println("Test completed");   
     }
 
     @Test
