@@ -11,23 +11,6 @@ public class MailPitMessageAssert extends AbstractAssert<MailPitMessageAssert, M
         super(actual, MailPitMessageAssert.class);
     }
 
-    public static MailPitMessageAssert assertMailPitMessage(MailPitMessage actual) {
-        return new MailPitMessageAssert(actual);
-    }
-
-    public MailPitMessageAssert hasBodySnippet(String text) {
-        isNotNull();
-
-        if (!actual.snippet().equals(text)) {
-            failWithMessage(
-                    "Expected 'message body snippet' to be <%s> but was <%s>"
-                    , text
-                    , actual.snippet()
-            );
-        }
-        return this;
-    }
-
     public MailPitMessageAssert bodySnippetContains(String text) {
         isNotNull();
 
@@ -59,7 +42,7 @@ public class MailPitMessageAssert extends AbstractAssert<MailPitMessageAssert, M
 
         if (!actual.from().address().equals(sender)) {
             failWithMessage(
-                    "Expected 'sender' <%s> does not exist in actual sender list <%s>"
+                    "Expected 'sender' to be <%s> but was <%s>"
                     , sender
                     , actual.from().address()
             );
@@ -83,4 +66,5 @@ public class MailPitMessageAssert extends AbstractAssert<MailPitMessageAssert, M
         }
         return this;
     }
+    
 }

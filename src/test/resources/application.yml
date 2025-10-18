@@ -1,0 +1,11 @@
+mail:
+  user: mail-pit-user
+  password: mail-pit-password
+  smtp:
+    host: localhost
+    port: 2525
+    auth: true
+    starttls:
+      enable: true
+    ssl:
+      protocol: TLSv1.2
