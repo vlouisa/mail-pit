@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Getter
 @Setter
-@Configuration
 @ConfigurationProperties(prefix = "mail")
 public class EmailProperties {
 
