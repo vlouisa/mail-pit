@@ -195,7 +195,7 @@ public class MailPitResponseAssertTest {
             "0, Message number should be greater than 0, but was <0>",
             "4, Total number of messages in response is <1>, requested message <4> doesn't exist",
     })
-    void shouldThrowExceptionWhenAssertingMessageOutOfBounds(int messageNumber, String assertionMessage) throws JsonProcessingException {
+    void shouldThrowExceptionWhenAssertingMessageOutOfBounds(int messageNumber, String assertionMessage) {
         asyncEmailService.sendEmail(
                 Email.builder()
                         .from(address("Elaine from Monkey Island", "elaine.marley@monkey-island.test"))
