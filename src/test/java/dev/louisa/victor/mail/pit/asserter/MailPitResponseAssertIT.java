@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
         AsyncEmailService.class,
         TestMailConfig.class,
         MailPitContainer.class})
-public class MailPitResponseAssertTest {
+public class MailPitResponseAssertIT {
 
     @Autowired
     private MailPitContainer mailPitContainer;

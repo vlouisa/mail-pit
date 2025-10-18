@@ -10,8 +10,8 @@
     <version>0.2.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Mock Rest</name>
-    <description>Mail SMTP for testing</description>
+    <name>Mail-Pit Wrapper</name>
+    <description>Mail SMTP wrapper for testing email</description>
     <url>https://github.com/vlouisa/mail-pit</url>
 
     <licenses>
@@ -53,6 +53,7 @@
         <maven-doc.version>3.8.0</maven-doc.version>
         <maven-source.version>3.3.1</maven-source.version>
         <maven.compiler.version>3.13.0</maven.compiler.version>
+        <maven-failsafe.version>3.5.4</maven-failsafe.version>
         <rest-assured.version>5.5.6</rest-assured.version>
         <testcontainers.version>1.21.3</testcontainers.version>
 
@@ -146,21 +147,6 @@
                 </executions>
             </plugin>
 
-            <!-- Attach javadocs -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven-doc.version}</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!-- Compiler with Java 21 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -169,6 +155,25 @@
                 <configuration>
                     <release>${java.version}</release>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven-failsafe.version}</version>
+                <executions>
+                    <execution>
+                        <id>integration-tests</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
